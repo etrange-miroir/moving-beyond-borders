@@ -62,3 +62,7 @@ Not sure it's the best way, but it makes the video very light.
 ```
 avconv -i input.mp4 -vcodec h264 -profile:v main -preset medium -tune animation -crf 18 -b-pyramid none -acodec ac3 -ab 1536k -scodec copy output.mp4
 ```
+
+## TODO
+
+- use init.d to run the app at startup
