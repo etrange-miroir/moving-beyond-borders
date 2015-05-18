@@ -8,6 +8,10 @@ void mbb::setup() {
 	consoleListener.setup(this);
 	ofBackground(0, 0, 0);
 	ofHideCursor();
+	// ofxOMXPlayer conf
+	ofxOMXPlayerSettings settings;
+	settings.enableTexture = false;
+	omxPlayer.setup(settings);
 	// load the first movie
 	loadMovie("intro.mp4");
 	// assign initial values
@@ -30,12 +34,12 @@ void mbb::update() {
 			loadMovie(nextVideo);
 		}
 		else {
-			alpha = alpha - 10;
+			alpha = alpha - 1.0;
 			alpha = ofClamp(alpha, 0, 255);
 		}
 	}
 	else {
-		alpha = alpha + 10;
+		alpha = alpha + 1.0;
 		alpha = ofClamp(alpha, 0, 255);
 	}
 }
@@ -44,14 +48,13 @@ void mbb::update() {
  * Draw routine
  */
 void mbb::draw() {
-	// ofEnableAlphaBlending();
+	//if (alpha < 255) {
 	ofSetColor(255, 255, 255, alpha);
 	omxPlayer.setVolume(alpha/(255*2));
+	//}
 	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-	// ofDisableAlphaBlending();
 
-	// display some info in debug mode
-	if (DEBUG) ofDrawBitmapStringHighlight(omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+	if (DEBUG) ofLogNotice(__func__) << ofGetFrameRate();
 }
 
 /**

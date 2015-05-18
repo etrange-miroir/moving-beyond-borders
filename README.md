@@ -20,6 +20,8 @@ Should work with any USB stick, if not use `sudo blkid` to get the UUID and use 
 /dev/sda1 /media/mbb       vfat    defaults          0       2
 ```
 
+## Use 384Mo for GPU memory
+
 ## Clone the project
 
 ```
