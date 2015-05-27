@@ -21,10 +21,8 @@ class mbb : public ofBaseApp, public ofxOMXPlayerListener, public KeyListener {
 		TerminalListener consoleListener;
 		void keyPressed(int key);
 		// arduino stuff
-		ofArduino arduino;
-		bool arduinoSetupDone;
-		void setupArduino(const int &version);
-		void digitalPinChanged(const int &pinNum);
+		ofSerial serial;
+		void handleArduinoCommand(string cmd);
 		//void analogPinChanged(const int & pinNum);
 		void updateArduino();
 		// instance of omxplayer

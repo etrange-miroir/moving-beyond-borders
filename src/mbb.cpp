@@ -24,17 +24,22 @@ void mbb::setup() {
 	alpha = 255;
 	fadingOut = false;
 	// arduino stuff
-	arduino.connect("/dev/ttyACM0", 57600);
-	ofAddListener(arduino.EInitialized, this, &mbb::setupArduino);
-	arduinoSetupDone = false;
+	serial.setup("/dev/ttyACM0", 9600);
 }
 
 /**
  * Update routine
  */
 void mbb::update() {
-	arduino.update();
-
+	// check for incoming data from arduino
+	char first = serial.readByte();
+	char second = serial.readByte();
+	if (first != OF_SERIAL_NO_DATA && first != OF_SERIAL_ERROR
+		&& second != OF_SERIAL_NO_DATA && second != OF_SERIAL_ERROR) {
+		string cmd = string(1, first) + string(1, second);
+		handleArduinoCommand(cmd);
+	}
+	// fade if needed
 	unsigned long currentTime = ofGetElapsedTimeMillis();
 	if (fadingOut) {
 		if (currentTime - lastFadeOutStart > 1000) {
@@ -83,6 +88,7 @@ void mbb::loadMovie(string movie, string language) {
 void mbb::onCharacterReceived(KeyListenerEventData& e) {
 	keyPressed((int)e.character);
 }
+
 void mbb::keyPressed(int key) {
 	ofLogNotice(__func__) << "key: " << key;
 	switch (key) {
@@ -122,25 +128,27 @@ void mbb::keyPressed(int key) {
 }
 
 /**
- * Arduino setup
+ * Handle arduino commands
  */
-void mbb::setupArduino(const int &version) {
-	// remove listener because we don't need it anymore
-	ofRemoveListener(arduino.EInitialized, this, &mbb::setupArduino);
-	arduinoSetupDone = true;
-	ofLogNotice(__func__) << "ready";
-	// init pins
-	arduino.sendDigitalPinMode(3, ARD_INPUT);
-	arduino.sendDigital(3, ARD_HIGH);
-	// listen pin changes
-	ofAddListener(arduino.EDigitalPinChanged, this, &mbb::digitalPinChanged);
-}
-
-void mbb::digitalPinChanged(const int &pinNum) {
-	ofLogNotice(__func__) << "test";
-	if (arduino.getDigital(pinNum) == ARD_LOW) {
+void mbb::handleArduinoCommand(string cmd) {
+	if (cmd == "en" || cmd == "fr" || cmd == "es" || cmd == "it" || cmd == "ar") {
 		fadingOut = true;
 		lastFadeOutStart = ofGetElapsedTimeMillis();
-		nextVideo = "page1";
+		currentLanguage = cmd;
+	}
+	else if (cmd == "in") {
+
+	}
+	else if (cmd == "p1") {
+
+	}
+	else if (cmd == "p2") {
+
+	}
+	else if (cmd == "p3") {
+
+	}
+	else if (cmd == "ou") {
+
 	}
 }
