@@ -10,11 +10,17 @@ void mbb::setup() {
 	ofHideCursor();
 	// ofxOMXPlayer conf
 	ofxOMXPlayerSettings settings;
-	settings.enableTexture = false;
+	//settings.enableTexture = false;
 	omxPlayer.setup(settings);
+	// starting language
+	currentLanguage = "en";
+	// starting video
+	nextVideo = "intro";
 	// load the first movie
-	loadMovie("intro.mp4");
+	loadMovie(nextVideo, currentLanguage);
 	// assign initial values
+	lastFadeOutStart = ofGetElapsedTimeMillis();
+	previousTime = ofGetElapsedTimeMillis();
 	alpha = 255;
 	fadingOut = false;
 	// arduino stuff
@@ -27,20 +33,24 @@ void mbb::setup() {
  * Update routine
  */
 void mbb::update() {
+	arduino.update();
+
 	unsigned long currentTime = ofGetElapsedTimeMillis();
 	if (fadingOut) {
 		if (currentTime - lastFadeOutStart > 1000) {
 			fadingOut = false;
-			loadMovie(nextVideo);
+			loadMovie(nextVideo, currentLanguage);
 		}
-		else {
-			alpha = alpha - 1.0;
+		else if (currentTime - previousTime > 30) {
+			alpha = alpha - 10.0;
 			alpha = ofClamp(alpha, 0, 255);
+			previousTime = currentTime;
 		}
 	}
-	else {
-		alpha = alpha + 1.0;
+	else if (currentTime - previousTime > 30) {
+		alpha = alpha + 10.0;
 		alpha = ofClamp(alpha, 0, 255);
+		previousTime = currentTime;
 	}
 }
 
@@ -54,15 +64,16 @@ void mbb::draw() {
 	//}
 	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
 
-	if (DEBUG) ofLogNotice(__func__) << ofGetFrameRate();
+	//if (DEBUG) ofLogNotice(__func__) << ofGetFrameRate();
+	ofDrawBitmapStringHighlight(omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 
 /**
  * Load the given movie
  */
-void mbb::loadMovie(string movie) {
-	ofLogNotice(__func__) << movie;
-	string videoPath = "/media/mbb/" + movie;
+void mbb::loadMovie(string movie, string language) {
+	ofLogNotice(__func__) << movie << " " <<language;
+	string videoPath = "/media/mbb/" + movie + "_" + language + ".mp4";
 	omxPlayer.loadMovie(videoPath);
 }
 
@@ -78,32 +89,30 @@ void mbb::keyPressed(int key) {
 		case 'a': {
 			fadingOut = true;
 			lastFadeOutStart = ofGetElapsedTimeMillis();
-			nextVideo = "intro.mp4";
+			nextVideo = "intro";
 			break;
 		}
 		case 'b': {
 			fadingOut = true;
 			lastFadeOutStart = ofGetElapsedTimeMillis();
-			nextVideo = "bbb.mov";
+			nextVideo = "page1";
 			break;
 		}
 		case 'c': {
 			fadingOut = true;
 			lastFadeOutStart = ofGetElapsedTimeMillis();
-			nextVideo = "bbb.mp4";
+			currentLanguage = "en";
+			break;
+		}
+		case 'd': {
+			fadingOut = true;
+			lastFadeOutStart = ofGetElapsedTimeMillis();
+			currentLanguage = "fr";
 			break;
 		}
 		case 'p': {
 			omxPlayer.togglePause();
 			ofLogNotice(__func__) << "pause: " << omxPlayer.isPaused();
-			break;
-		}
-		case 'o': {
-			arduino.sendDigital(13, ARD_HIGH);
-			break;
-		}
-		case 'i': {
-			arduino.sendDigital(13, ARD_LOW);
 			break;
 		}
 		default: {
@@ -119,5 +128,19 @@ void mbb::setupArduino(const int &version) {
 	// remove listener because we don't need it anymore
 	ofRemoveListener(arduino.EInitialized, this, &mbb::setupArduino);
 	arduinoSetupDone = true;
-	arduino.sendDigitalPinMode(13, ARD_OUTPUT);
+	ofLogNotice(__func__) << "ready";
+	// init pins
+	arduino.sendDigitalPinMode(3, ARD_INPUT);
+	arduino.sendDigital(3, ARD_HIGH);
+	// listen pin changes
+	ofAddListener(arduino.EDigitalPinChanged, this, &mbb::digitalPinChanged);
+}
+
+void mbb::digitalPinChanged(const int &pinNum) {
+	ofLogNotice(__func__) << "test";
+	if (arduino.getDigital(pinNum) == ARD_LOW) {
+		fadingOut = true;
+		lastFadeOutStart = ofGetElapsedTimeMillis();
+		nextVideo = "page1";
+	}
 }
