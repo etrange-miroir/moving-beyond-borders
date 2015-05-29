@@ -33,7 +33,7 @@ Should work with any USB stick, if not use `sudo blkid` to get the UUID and use 
 
 ```
 cd ~
-git clone https://github.com/xseignard/mbb.git
+git clone https://github.com/etrange-miroir/moving-beyond-borders.git
 ```
 
 ## Overclock RPi2
@@ -41,7 +41,7 @@ git clone https://github.com/xseignard/mbb.git
 Copy `misc/config.txt` to `/boot/config.txt`
 
 ```
-sudo cp misc/config.txt /boot/confog.txt
+sudo cp misc/config.txt /boot/config.txt
 ```
 
 ## Compile and run it
@@ -59,9 +59,9 @@ make
 make run
 ```
 
-## Upload Standard Firmata on the Arduino
+## Arduino code
 
-Plain simple
+Arduino code is in the `arduino` folder.
 
 ## Naming videos
 

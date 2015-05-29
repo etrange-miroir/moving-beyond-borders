@@ -2,10 +2,9 @@
 
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
-#include "ofEvents.h"
-#include "TerminalListener.h"
+//#include "ofEvents.h"
 
-class mbb : public ofBaseApp, public ofxOMXPlayerListener, public KeyListener {
+class mbb : public ofBaseApp, public ofxOMXPlayerListener {
 	public:
 		// openframeworks routines
 		void setup();
@@ -16,19 +15,18 @@ class mbb : public ofBaseApp, public ofxOMXPlayerListener, public KeyListener {
 		// omxplayer events, not used
 		void onVideoEnd(ofxOMXPlayerListenerEventData& e){};
 		void onVideoLoop(ofxOMXPlayerListenerEventData& e){};
-		// keyboard listener
-		void onCharacterReceived(KeyListenerEventData& e);
-		TerminalListener consoleListener;
-		void keyPressed(int key);
 		// arduino stuff
 		ofSerial serial;
 		void handleArduinoCommand(string cmd);
-		//void analogPinChanged(const int & pinNum);
-		void updateArduino();
+		bool initOK;
 		// instance of omxplayer
 		ofxOMXPlayer omxPlayer;
 		// flag to check if we need to fade out
 		bool fadingOut;
+		// flag to check if we need to fade in
+		bool fadingIn;
+		// flag to check if fading is auto
+		bool autoFading;
 		// alpha transparency while fading in and out
 		float alpha;
 		// next video to be played

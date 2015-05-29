@@ -1,5 +1,5 @@
-#ifndef Planet_H
-#define Planet_H
+#ifndef Lang_H
+#define Lang_H
 
 #include "Arduino.h"
 

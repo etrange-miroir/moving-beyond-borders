@@ -5,7 +5,6 @@
  */
 void mbb::setup() {
 	// some setup conf
-	consoleListener.setup(this);
 	ofBackground(0, 0, 0);
 	ofHideCursor();
 	// ofxOMXPlayer conf
@@ -14,10 +13,6 @@ void mbb::setup() {
 	omxPlayer.setup(settings);
 	// starting language
 	currentLanguage = "en";
-	// starting video
-	nextVideo = "intro";
-	// load the first movie
-	loadMovie(nextVideo, currentLanguage);
 	// assign initial values
 	lastFadeOutStart = ofGetElapsedTimeMillis();
 	previousTime = ofGetElapsedTimeMillis();
@@ -25,37 +20,50 @@ void mbb::setup() {
 	fadingOut = false;
 	// arduino stuff
 	serial.setup("/dev/ttyACM0", 9600);
+	initOK = false;
 }
 
 /**
  * Update routine
  */
 void mbb::update() {
-	// check for incoming data from arduino
-	char first = serial.readByte();
-	char second = serial.readByte();
-	if (first != OF_SERIAL_NO_DATA && first != OF_SERIAL_ERROR
-		&& second != OF_SERIAL_NO_DATA && second != OF_SERIAL_ERROR) {
-		string cmd = string(1, first) + string(1, second);
-		handleArduinoCommand(cmd);
-	}
-	// fade if needed
-	unsigned long currentTime = ofGetElapsedTimeMillis();
-	if (fadingOut) {
-		if (currentTime - lastFadeOutStart > 1000) {
-			fadingOut = false;
-			loadMovie(nextVideo, currentLanguage);
+	// connection with arduino is OK, the app can work
+	if (initOK) {
+		// check for incoming data from arduino
+		char first = serial.readByte();
+		char second = serial.readByte();
+		if (first != OF_SERIAL_NO_DATA && first != OF_SERIAL_ERROR
+			&& second != OF_SERIAL_NO_DATA && second != OF_SERIAL_ERROR) {
+			string cmd = string(1, first) + string(1, second);
+			handleArduinoCommand(cmd);
 		}
-		else if (currentTime - previousTime > 30) {
+		// fade if needed
+		unsigned long currentTime = ofGetElapsedTimeMillis();
+		if (fadingOut && currentTime - previousTime > 30) {
 			alpha = alpha - 10.0;
 			alpha = ofClamp(alpha, 0, 255);
 			previousTime = currentTime;
 		}
+		else if (currentTime - previousTime > 30) {
+			alpha = alpha + 10.0;
+			alpha = ofClamp(alpha, 0, 255);
+			previousTime = currentTime;
+		}
+		// if auto mode (change language) or fading in (pages) is needed
+		if ((autoFading && currentTime - lastFadeOutStart > 1000)
+			|| fadingIn) {
+			fadingOut = false;
+			fadingIn = false;
+			autoFading = false;
+			loadMovie(nextVideo, currentLanguage);
+		}
 	}
-	else if (currentTime - previousTime > 30) {
-		alpha = alpha + 10.0;
-		alpha = ofClamp(alpha, 0, 255);
-		previousTime = currentTime;
+	// wait for the connection with arduino to be up and notify it
+	// in order to get the current state of pages
+	else if (serial.isInitialized() && !initOK) {
+		initOK = true;
+		char init = '#';
+		serial.writeByte(init);
 	}
 }
 
@@ -63,68 +71,22 @@ void mbb::update() {
  * Draw routine
  */
 void mbb::draw() {
-	//if (alpha < 255) {
 	ofSetColor(255, 255, 255, alpha);
 	omxPlayer.setVolume(alpha/(255*2));
-	//}
 	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
 
-	//if (DEBUG) ofLogNotice(__func__) << ofGetFrameRate();
-	ofDrawBitmapStringHighlight(omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+	if (DEBUG) {
+		ofDrawBitmapStringHighlight(omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+	}
 }
 
 /**
  * Load the given movie
  */
 void mbb::loadMovie(string movie, string language) {
-	ofLogNotice(__func__) << movie << " " <<language;
+	ofLogNotice(__func__) << movie << "_" << language;
 	string videoPath = "/media/mbb/" + movie + "_" + language + ".mp4";
 	omxPlayer.loadMovie(videoPath);
-}
-
-/**
- * Handle keyboard events
- */
-void mbb::onCharacterReceived(KeyListenerEventData& e) {
-	keyPressed((int)e.character);
-}
-
-void mbb::keyPressed(int key) {
-	ofLogNotice(__func__) << "key: " << key;
-	switch (key) {
-		case 'a': {
-			fadingOut = true;
-			lastFadeOutStart = ofGetElapsedTimeMillis();
-			nextVideo = "intro";
-			break;
-		}
-		case 'b': {
-			fadingOut = true;
-			lastFadeOutStart = ofGetElapsedTimeMillis();
-			nextVideo = "page1";
-			break;
-		}
-		case 'c': {
-			fadingOut = true;
-			lastFadeOutStart = ofGetElapsedTimeMillis();
-			currentLanguage = "en";
-			break;
-		}
-		case 'd': {
-			fadingOut = true;
-			lastFadeOutStart = ofGetElapsedTimeMillis();
-			currentLanguage = "fr";
-			break;
-		}
-		case 'p': {
-			omxPlayer.togglePause();
-			ofLogNotice(__func__) << "pause: " << omxPlayer.isPaused();
-			break;
-		}
-		default: {
-			break;
-		}
-	}
 }
 
 /**
@@ -132,23 +94,50 @@ void mbb::keyPressed(int key) {
  */
 void mbb::handleArduinoCommand(string cmd) {
 	if (cmd == "en" || cmd == "fr" || cmd == "es" || cmd == "it" || cmd == "ar") {
+		ofLogNotice(__func__) << cmd;
 		fadingOut = true;
+		fadingIn = false;
+		autoFading = true;
 		lastFadeOutStart = ofGetElapsedTimeMillis();
 		currentLanguage = cmd;
 	}
+	// not all pages are down, fade out then
+	else if (cmd == "ko") {
+		ofLogNotice(__func__) << cmd;
+		fadingOut = true;
+		fadingIn = false;
+		autoFading = false;
+	}
+	// intro
 	else if (cmd == "in") {
-
+		ofLogNotice(__func__) << cmd;
+		fadingOut = false;
+		fadingIn = true;
+		autoFading = false;
+		nextVideo = "intro";
 	}
+	// page 1
 	else if (cmd == "p1") {
-
+		ofLogNotice(__func__) << cmd;
+		fadingOut = false;
+		fadingIn = true;
+		autoFading = false;
+		nextVideo = "page1";
 	}
+	// page 2
 	else if (cmd == "p2") {
-
+		ofLogNotice(__func__) << cmd;
+		fadingOut = false;
+		fadingIn = true;
+		autoFading = false;
+		nextVideo = "page2";
 	}
-	else if (cmd == "p3") {
-
-	}
+	// outro
 	else if (cmd == "ou") {
-
+		ofLogNotice(__func__) << cmd;
+		fadingOut = false;
+		fadingIn = true;
+		autoFading = false;
+		nextVideo = "outro";
 	}
 }
