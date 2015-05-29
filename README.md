@@ -65,12 +65,14 @@ Arduino code is in the `arduino` folder.
 
 ## Naming videos
 
-Put videos at the root of the USB stick.
+Put videos at the root of the USB stick. Use a suffix to specify tha language (e.g: _en, _fr, _es, _it, _ar).
 
-- intro.mp4
-- page1.mp4
-- ...
-- outro.mp4
+Example for english videos:
+
+- intro_en.mp4
+- page1_en.mp4
+- page2_en.mp4
+- outro_en.mp4
 
 ## Convert a video
 
