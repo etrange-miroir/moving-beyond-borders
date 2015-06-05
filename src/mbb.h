@@ -15,6 +15,8 @@ class mbb : public ofBaseApp, public ofxOMXPlayerListener {
 		// omxplayer events, not used
 		void onVideoEnd(ofxOMXPlayerListenerEventData& e){};
 		void onVideoLoop(ofxOMXPlayerListenerEventData& e){};
+		// check to see if video has ended
+		void checkForEnd();
 		// arduino stuff
 		ofSerial serial;
 		void handleArduinoCommand(string cmd);

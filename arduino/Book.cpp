@@ -27,16 +27,17 @@ void Book::check() {
 }
 
 String Book::getState() {
+	// when LOW it means the magnet is in front of the sensor
 	// intro
 	if (!digitalRead(_pin[3]) && !digitalRead(_pin[4]) && !digitalRead(_pin[5])) {
 		return "in";
 	}
 	// page 1
-	else if (!digitalRead(_pin[0]) && !digitalRead(_pin[4]) && !digitalRead(_pin[5])) {
+	else if (!digitalRead(_pin[3]) && !digitalRead(_pin[4]) && !digitalRead(_pin[0])) {
 		return "p1";
 	}
 	// page 2
-	else if (!digitalRead(_pin[0]) && !digitalRead(_pin[1]) && !digitalRead(_pin[5])) {
+	else if (!digitalRead(_pin[0]) && !digitalRead(_pin[1]) && !digitalRead(_pin[3])) {
 		return "p2";
 	}
 	// outro

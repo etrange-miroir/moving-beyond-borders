@@ -12,7 +12,7 @@ void mbb::setup() {
 	//settings.enableTexture = false;
 	omxPlayer.setup(settings);
 	// starting language
-	currentLanguage = "en";
+	currentLanguage = "fr";
 	// assign initial values
 	lastFadeOutStart = ofGetElapsedTimeMillis();
 	previousTime = ofGetElapsedTimeMillis();
@@ -55,7 +55,16 @@ void mbb::update() {
 			fadingOut = false;
 			fadingIn = false;
 			autoFading = false;
-			loadMovie(nextVideo, currentLanguage);
+			if (nextVideo == "introLoop") {
+				loadMovie(nextVideo, "");
+			}
+			else {
+				loadMovie(nextVideo, currentLanguage);
+			}
+		}
+		// check if video is ending
+		if (nextVideo == "outro") {
+			checkForEnd();
 		}
 	}
 	// wait for the connection with arduino to be up and notify it
@@ -84,9 +93,25 @@ void mbb::draw() {
  * Load the given movie
  */
 void mbb::loadMovie(string movie, string language) {
-	ofLogNotice(__func__) << movie << "_" << language;
-	string videoPath = "/media/mbb/" + movie + "_" + language + ".mp4";
+	string videoPath = "/media/mbb/" + movie;
+	if (language == "") {
+		videoPath += ".mp4";
+	}
+	else {
+		videoPath += "_" + language + ".mp4";
+	}
+	ofLogNotice(__func__) << videoPath;
 	omxPlayer.loadMovie(videoPath);
+}
+
+/**
+ * Callback when a video ends
+ */
+void mbb::checkForEnd() {
+	if (omxPlayer.getCurrentFrame() >= omxPlayer.getTotalNumFrames()) {
+		nextVideo = "outroLoop";
+		loadMovie("outroLoop", "");
+	}
 }
 
 /**
@@ -95,11 +120,20 @@ void mbb::loadMovie(string movie, string language) {
 void mbb::handleArduinoCommand(string cmd) {
 	if (cmd == "en" || cmd == "fr" || cmd == "es" || cmd == "it" || cmd == "ar") {
 		ofLogNotice(__func__) << cmd;
-		fadingOut = true;
-		fadingIn = false;
-		autoFading = true;
-		lastFadeOutStart = ofGetElapsedTimeMillis();
-		currentLanguage = cmd;
+		if(nextVideo == "introLoop" || nextVideo == "intro") {
+			nextVideo = "intro";
+			currentLanguage = cmd;
+			loadMovie("intro", currentLanguage);
+		}
+		// virer le loadMovie de dessus + le else (garder le if)
+		// pour un fade entre introLoop et intro
+		else if (nextVideo != "outroLoop") {
+			fadingOut = true;
+			fadingIn = false;
+			autoFading = true;
+			lastFadeOutStart = ofGetElapsedTimeMillis();
+			currentLanguage = cmd;
+		}
 	}
 	// not all pages are down, fade out then
 	else if (cmd == "ko") {
@@ -114,7 +148,7 @@ void mbb::handleArduinoCommand(string cmd) {
 		fadingOut = false;
 		fadingIn = true;
 		autoFading = false;
-		nextVideo = "intro";
+		nextVideo = "introLoop";
 	}
 	// page 1
 	else if (cmd == "p1") {
