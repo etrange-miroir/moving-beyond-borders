@@ -1,1 +1,3 @@
 PROJECT_EXCLUSIONS = $(PROJECT_ROOT)/arduino
+#PROJECT_LDFLAGS = -Wl,-rpath=./libs
+PROJECT_LDFLAGS = -lwiringPi

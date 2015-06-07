@@ -1,0 +1,30 @@
+#!/bin/bash
+# /etc/init.d/moving-beyond-borders
+
+### BEGIN INIT INFO
+# Provides:          moving-beyond-borders
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Starts moving beyond borders app
+# Description:       This service is used to start moving beyond borders app
+### END INIT INFO
+
+
+case "$1" in
+	start)
+		echo "Starting moving-beyond-borders"
+		/home/pi/moving-beyond-borders/bin/moving-beyond-borders
+		;;
+	stop)
+		echo "Stopping moving-beyond-borders"
+		killall moving-beyond-borders
+		;;
+	*)
+		echo "Usage: /etc/init.d/moving-beyond-borders start|stop"
+		exit 1
+		;;
+esac
+
+exit 0

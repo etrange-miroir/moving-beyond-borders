@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
+#include "wiringPi.h"
 //#include "ofEvents.h"
 
 class mbb : public ofBaseApp, public ofxOMXPlayerListener {
@@ -21,6 +22,9 @@ class mbb : public ofBaseApp, public ofxOMXPlayerListener {
 		ofSerial serial;
 		void handleArduinoCommand(string cmd);
 		bool initOK;
+		// shutdown button
+		const static int SHUTDOWN_PIN = 7;
+		static void shutdown();
 		// instance of omxplayer
 		ofxOMXPlayer omxPlayer;
 		// flag to check if we need to fade out

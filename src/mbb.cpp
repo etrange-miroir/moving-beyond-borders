@@ -21,6 +21,13 @@ void mbb::setup() {
 	// arduino stuff
 	serial.setup("/dev/ttyACM0", 9600);
 	initOK = false;
+	// gpio stuff for shutdown button
+	if(wiringPiSetup() == -1){
+		ofLogNotice(__func__) << "Error on wiringPi setup";
+	}
+	pinMode(SHUTDOWN_PIN, INPUT);
+	pullUpDnControl(SHUTDOWN_PIN, PUD_UP);
+	wiringPiISR(SHUTDOWN_PIN, INT_EDGE_FALLING, &mbb::shutdown);
 }
 
 /**
@@ -120,9 +127,9 @@ void mbb::checkForEnd() {
 void mbb::handleArduinoCommand(string cmd) {
 	if (cmd == "en" || cmd == "fr" || cmd == "es" || cmd == "it" || cmd == "ar") {
 		ofLogNotice(__func__) << cmd;
+		currentLanguage = cmd;
 		if(nextVideo == "introLoop" || nextVideo == "intro") {
 			nextVideo = "intro";
-			currentLanguage = cmd;
 			loadMovie("intro", currentLanguage);
 		}
 		// virer le loadMovie de dessus + le else (garder le if)
@@ -132,7 +139,6 @@ void mbb::handleArduinoCommand(string cmd) {
 			fadingIn = false;
 			autoFading = true;
 			lastFadeOutStart = ofGetElapsedTimeMillis();
-			currentLanguage = cmd;
 		}
 	}
 	// not all pages are down, fade out then
@@ -174,4 +180,13 @@ void mbb::handleArduinoCommand(string cmd) {
 		autoFading = false;
 		nextVideo = "outro";
 	}
+}
+
+/**
+ * Shutdown function
+ */
+void mbb::shutdown() {
+	ofLogNotice(__func__) << "shutdown";
+	system("shutdown -h now");
+	ofExit();
 }

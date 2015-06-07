@@ -8,7 +8,7 @@ void Lang::check() {
 	int currentState = digitalRead(_pin);
 	if (currentState == LOW && _previousState == HIGH) {
 		Serial.print(_code);
-		delay(50);
 	}
 	_previousState = currentState;
+	delay(20);
 }
