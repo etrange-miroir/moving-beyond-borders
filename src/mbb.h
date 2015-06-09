@@ -16,8 +16,6 @@ class mbb : public ofBaseApp, public ofxOMXPlayerListener {
 		// omxplayer events, not used
 		void onVideoEnd(ofxOMXPlayerListenerEventData& e){};
 		void onVideoLoop(ofxOMXPlayerListenerEventData& e){};
-		// check to see if video has ended
-		void checkForEnd();
 		// arduino stuff
 		ofSerial serial;
 		void handleArduinoCommand(string cmd);
@@ -44,6 +42,6 @@ class mbb : public ofBaseApp, public ofxOMXPlayerListener {
 		// keep track of the last time we started a fade
 		unsigned long lastFadeOutStart;
 		// debug flag
-		const static bool DEBUG = true;
+		const static bool DEBUG = false;
 };
 

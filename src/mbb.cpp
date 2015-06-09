@@ -62,16 +62,12 @@ void mbb::update() {
 			fadingOut = false;
 			fadingIn = false;
 			autoFading = false;
-			if (nextVideo == "introLoop") {
+			if (nextVideo == "introLoop" || nextVideo == "outro") {
 				loadMovie(nextVideo, "");
 			}
 			else {
 				loadMovie(nextVideo, currentLanguage);
 			}
-		}
-		// check if video is ending
-		if (nextVideo == "outro") {
-			checkForEnd();
 		}
 	}
 	// wait for the connection with arduino to be up and notify it
@@ -109,16 +105,6 @@ void mbb::loadMovie(string movie, string language) {
 	}
 	ofLogNotice(__func__) << videoPath;
 	omxPlayer.loadMovie(videoPath);
-}
-
-/**
- * Callback when a video ends
- */
-void mbb::checkForEnd() {
-	if (omxPlayer.getCurrentFrame() >= omxPlayer.getTotalNumFrames()) {
-		nextVideo = "outroLoop";
-		loadMovie("outroLoop", "");
-	}
 }
 
 /**
