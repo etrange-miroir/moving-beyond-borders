@@ -120,7 +120,7 @@ void mbb::handleArduinoCommand(string cmd) {
 		}
 		// virer le loadMovie de dessus + le else (garder le if)
 		// pour un fade entre introLoop et intro
-		else if (nextVideo != "outroLoop") {
+		else if (nextVideo != "outro") {
 			fadingOut = true;
 			fadingIn = false;
 			autoFading = true;
