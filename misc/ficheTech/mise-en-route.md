@@ -1,6 +1,6 @@
 # Démarrer l'installation
 
-- Brancher les 4 prises repérée avec du scotch rouge
+- Brancher les 4 prises repérées avec du scotch rouge
 - Allumer les vidéo projecteurs grace à la télécommande se trouvant au dessus du module à gauche près de l'entrée
 - Remettre la télécommande à sa place
 - Sur le gradateur, mettre la tranche numéro 1 à 40%
