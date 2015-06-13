@@ -26,6 +26,7 @@ Répéter cela jsuqu'à ce que la vidéo apparaisse.
 - Attendre que les 5 vidéo projecteurs bippent
 - Remettre la télécommande à sa place
 - Débrancher les 4 prises repérées par un scotch rouge
+- Sur le gradateur, mettre la tranche numéro 1 à 0%
 
 # En cas de soucis
 
