@@ -10,7 +10,7 @@ Lang ar(6, HIGH, "ar");
 const int NUMBER_OF_LANG = 5;
 Lang languages[NUMBER_OF_LANG] = { en, fr, es, it, ar };
 
-Book book(7, 8, 9, 10, 16, 14);
+Book book(7, 8, 9, 10, A2, A0);
 
 void setup() {
 	Serial.begin(9600);
